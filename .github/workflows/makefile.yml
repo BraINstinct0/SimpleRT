@@ -1,0 +1,31 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: preconfigure env
+      run: |
+        sudo apt install -qq build-essential pkg-config libusb-1.0-0-dev
+        mkdir ./.debpkg
+        cd ./simple-rt-cli
+    - name: Install dependencies
+      run: make iface_up_sh_path=.
+      
+    - name: upload artifact
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/azblogfilter.windows-amd64.zip
+      asset_name: 
+      asset_content_type: application/zip
